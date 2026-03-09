@@ -1,15 +1,18 @@
 {
   "manifest_version": 3,
   "name": "金十快讯AI解读",
-  "version": "1.0.0",
-  "description": "为金十数据快讯添加AI深度解读功能",
+  "version": "1.6.0",
+  "description": "为金十数据快讯添加AI深度解读功能（带收藏功能）",
   "permissions": [
     "activeTab",
-    "storage"
+    "storage",
+    "downloads"
   ],
   "host_permissions": [
     "https://www.jin10.com/*",
-    "https://*.jin10.com/*"
+    "https://*.jin10.com/*",
+    "https://api.coingecko.com/*",
+    "https://hq.sinajs.cn/*"
   ],
   "action": {
     "default_popup": "popup.html"

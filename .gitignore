@@ -5,3 +5,6 @@ node_modules/
 .idea/
 dist/
 build/
+*_old.js
+fix_*.js
+*_new.js

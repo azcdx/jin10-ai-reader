@@ -1,129 +1,106 @@
 /**
  * 金十快讯AI解读 - Background Service Worker
- * 后台服务，处理插件生命周期和消息通信
+ * 处理文件下载功能和市场数据代理
  */
-
-// 插件安装时
-chrome.runtime.onInstalled.addListener((details) => {
-    if (details.reason === 'install') {
-        console.log('[金十AI解读] 插件已安装');
-
-        // 打开设置页面
-        chrome.tabs.create({
-            url: chrome.runtime.getURL('popup.html'),
-            active: false
-        });
-
-    } else if (details.reason === 'update') {
-        console.log('[金十AI解读] 插件已更新');
-    }
-});
 
 // 监听来自content script的消息
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    console.log('[金十AI解读] 收到消息:', request);
-
-    if (request.action === 'fetchAIAnalysis') {
-        // 处理AI分析请求
-        fetchAIAnalysis(request.data)
-            .then(result => sendResponse({ success: true, data: result }))
-            .catch(error => sendResponse({ success: false, error: error.message }));
-
+    if (request.action === 'downloadFavorite') {
+        downloadFavoriteFile(request.data);
+        sendResponse({ success: true });
+    } else if (request.action === 'fetchMarketData') {
+        fetchMarketData(request.url).then(data => {
+            sendResponse({ success: true, data: data });
+        }).catch(error => {
+            sendResponse({ success: false, error: error.message });
+        });
         return true; // 保持消息通道开启
     }
+    return true;
 });
 
 /**
- * 调用AI分析接口
+ * 下载收藏文件到按日期组织的文件夹
  */
-async function fetchAIAnalysis(data) {
-    const { content, apiKey, apiEndpoint } = data;
+async function downloadFavoriteFile(data) {
+    const { event, analysis, marketData, relatedMarkets, timestamp } = data;
 
+    // 生成日期文件夹路径
+    const date = new Date(timestamp);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    // 文件夹结构: favorites/2026-03-09/
+    const folderPath = `favorites/${year}-${month}-${day}/`;
+
+    // 生成文件名（使用事件的前20个字符作为标题）
+    const title = event.substring(0, 20).replace(/[<>:"/\\|?*]/g, '').trim();
+    const filename = `${folderPath}${hours}${minutes}_${title}.md`;
+
+    // 生成Markdown内容
+    const markdown = generateMarkdown(data, date);
+
+    // 使用chrome.downloads API下载文件
     try {
-        const response = await fetch(apiEndpoint || 'https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': apiKey,
-                'anthropic-version': '2023-06-01'
-            },
-            body: JSON.stringify({
-                model: 'claude-sonnet-4-20250514',
-                max_tokens: 2000,
-                messages: [
-                    {
-                        role: 'user',
-                        content: buildPrompt(content)
-                    }
-                ]
-            })
+        // 将内容转换为 data URL (Service Worker 不支持 URL.createObjectURL)
+        const dataUrl = 'data:text/markdown;charset=utf-8,' + encodeURIComponent(markdown);
+
+        await chrome.downloads.download({
+            url: dataUrl,
+            filename: filename,
+            saveAs: false
         });
 
-        if (!response.ok) {
-            throw new Error(`API请求失败: ${response.status}`);
-        }
-
-        const result = await response.json();
-        return result.content[0].text;
-
+        console.log('[金十AI解读] 收藏文件已保存:', filename);
     } catch (error) {
-        console.error('[金十AI解读] API调用失败:', error);
+        console.error('[金十AI解读] 下载失败:', error);
+    }
+}
+
+/**
+ * 代理获取市场数据（解决CORS问题）
+ */
+async function fetchMarketData(url) {
+    try {
+        const response = await fetch(url);
+        const text = await response.text();
+        return text;
+    } catch (error) {
+        console.error('[金十AI解读] 获取市场数据失败:', error);
         throw error;
     }
 }
 
 /**
- * 构建AI提示词
+ * 生成Markdown内容
  */
-function buildPrompt(content) {
-    return `请分析以下金十快讯，提供深度解读：
+function generateMarkdown(data, date) {
+    const { event, analysis, relatedMarkets } = data;
+    const dateStr = date.toLocaleString('zh-CN');
+    const markets = relatedMarkets.join(', ') || '无';
 
-【快讯内容】
-${content}
+    return `---
+title: 金十快讯解读收藏
+date: ${dateStr}
+related: ${markets}
+---
 
-请按照以下格式输出（简洁直观，每个模块3-5行）：
+# 📰 快讯内容
 
-📌 核心逻辑
-事件本质：
-因果链：
+${event}
 
-🔗 关联影响
-直接影响：
-间接影响：
+# 🤖 AI解读
 
-💰 利益博弈
-✓ 赢家：
-✗ 输家：
-当前情绪：[贪婪/恐惧]（●●●●○）
+${analysis}
 
-📊 市场验证
-理论影响：
-实际表现：（说明：需要实时数据验证，请标注"待验证"）
-消息消化度：
+# 📊 相关市场
 
-📈 走势预判
-短期（1-3天）：
-中期（1-2周）：
-关键价位：（标注"需要实时数据"）
+${markets}
 
-🎯 操作建议
-• 适合：
-• 风险：
-• 机会：
-
-⚠️ 重要提醒
-
-📚 历史参考
-类似事件：
-当时表现：
-本轮相似度：
-
-✅ 信息可信度
-来源：可信度：★★★★☆
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ 免责声明
-本解读仅供参考，不构成投资建议。
-市场有风险，投资需谨慎。
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+---
+收藏时间: ${dateStr}
+`;
 }

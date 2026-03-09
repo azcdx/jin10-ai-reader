@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>金十快讯AI解读 - 设置</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 400px;
+            min-height: 450px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            color: #4b5563;
+            margin-bottom: 6px;
+        }
+
+        .form-select,
+        .form-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 13px;
+            transition: border-color 0.2s;
+        }
+
+        .form-select:focus,
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-hint {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .status {
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            display: block;
+        }
+
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            display: block;
+        }
+
+        .api-cards {
+            display: grid;
+            gap: 8px;
+        }
+
+        .api-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .api-card:hover {
+            border-color: #667eea;
+            background: #f9fafb;
+        }
+
+        .api-card.selected {
+            border-color: #667eea;
+            background: #eef2ff;
+        }
+
+        .api-card-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .api-card-desc {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .endpoint-input {
+            margin-top: 12px;
+            display: none;
+        }
+
+        .endpoint-input.show {
+            display: block;
+        }
+
+        .footer {
+            padding: 16px 20px;
+            text-align: center;
+            font-size: 11px;
+            color: #9ca3af;
+            border-top: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 金十快讯AI解读</h1>
+        <p>选择你的AI服务提供商</p>
+    </div>
+
+    <div class="content">
+        <!-- API选择 -->
+        <div class="section">
+            <div class="section-title">🔑 选择AI服务</div>
+
+            <div class="api-cards">
+                <div class="api-card" data-provider="deepseek">
+                    <div class="api-card-name">DeepSeek</div>
+                    <div class="api-card-desc">高性价比，适合长文本分析</div>
+                </div>
+                <div class="api-card" data-provider="minimax">
+                    <div class="api-card-name">MiniMax</div>
+                    <div class="api-card-desc">响应快速，中文理解好</div>
+                </div>
+                <div class="api-card" data-provider="glm">
+                    <div class="api-card-name">GLM (智谱AI)</div>
+                    <div class="api-card-desc">国内大模型，稳定可靠</div>
+                </div>
+            </div>
+
+            <!-- API Key输入 -->
+            <div class="form-group" style="margin-top: 16px;">
+                <label class="form-label">API Key</label>
+                <input type="password" id="apiKey" class="form-input" placeholder="输入你的API Key">
+                <p class="form-hint" id="apiKeyHint">请先选择AI服务</p>
+            </div>
+
+            <!-- 自定义Endpoint -->
+            <div class="form-group endpoint-input" id="endpointGroup">
+                <label class="form-label">API Endpoint (可选)</label>
+                <input type="text" id="apiEndpoint" class="form-input" placeholder="默认使用官方地址">
+                <p class="form-hint">如有代理或自定义地址，可在此填写</p>
+            </div>
+
+            <button class="btn btn-primary" id="saveBtn">保存配置</button>
+            <div class="status" id="status"></div>
+        </div>
+
+        <!-- 获取API指引 -->
+        <div class="section" id="guideSection" style="display: none;">
+            <div class="section-title">📖 获取API Key</div>
+            <div id="guideContent" style="font-size: 12px; color: #6b7280;"></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        版本 1.0.0 | 仅供学习交流使用
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

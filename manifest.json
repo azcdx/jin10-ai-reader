@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "金十快讯AI解读",
+  "version": "1.0.0",
+  "description": "为金十数据快讯添加AI深度解读功能",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://www.jin10.com/*",
+    "https://*.jin10.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.jin10.com/*", "https://*.jin10.com/*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_end"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}

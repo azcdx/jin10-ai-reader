@@ -1,0 +1,17 @@
+{
+  "name": "jin10-ai-reader",
+  "version": "1.0.0",
+  "description": "金十快讯AI解读 - Chrome浏览器插件",
+  "scripts": {
+    "build": "echo 'Building extension...'",
+    "test": "echo 'No tests configured'"
+  },
+  "keywords": [
+    "chrome-extension",
+    "jin10",
+    "ai",
+    "financial-news"
+  ],
+  "author": "",
+  "license": "MIT"
+}

@@ -1,0 +1,40 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <rect width="128" height="128" rx="24" fill="url(#gradient)"/>
+
+  <!-- AI Robot Face -->
+  <g transform="translate(64, 64)">
+    <!-- Head -->
+    <circle cx="0" cy="-8" r="24" fill="white" opacity="0.9"/>
+
+    <!-- Eyes -->
+    <circle cx="-10" cy="-12" r="6" fill="#667eea"/>
+    <circle cx="10" cy="-12" r="6" fill="#667eea"/>
+
+    <!-- Eye shine -->
+    <circle cx="-8" cy="-14" r="2" fill="white"/>
+    <circle cx="12" cy="-14" r="2" fill="white"/>
+
+    <!-- Mouth (smile) -->
+    <path d="M -12 0 Q 0 8 12 0" stroke="#667eea" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+    <!-- Antenna -->
+    <line x1="0" y1="-32" x2="0" y2="-40" stroke="white" stroke-width="3"/>
+    <circle cx="0" cy="-42" r="4" fill="#764ba2"/>
+  </g>
+
+  <!-- Chart/Analysis icon at bottom -->
+  <g transform="translate(64, 100)">
+    <rect x="-20" y="-8" width="6" height="20" rx="2" fill="white" opacity="0.7"/>
+    <rect x="-6" y="-16" width="6" height="28" rx="2" fill="white" opacity="0.8"/>
+    <rect x="8" y="-24" width="6" height="36" rx="2" fill="white" opacity="0.9"/>
+  </g>
+
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#667eea"/>
+      <stop offset="100%" stop-color="#764ba2"/>
+    </linearGradient>
+  </defs>
+</svg>

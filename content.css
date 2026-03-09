@@ -1,0 +1,213 @@
+/**
+ * 金十快讯AI解读 - 样式文件
+ */
+
+/* AI解读按钮容器 */
+.jin10-ai-button-container {
+    margin: 8px 0;
+    padding: 0;
+}
+
+/* AI解读按钮 */
+.jin10-ai-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+}
+
+.jin10-ai-button:hover {
+    background: linear-gradient(135deg, #5568d3 0%, #63408a 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+}
+
+.jin10-ai-button:active {
+    transform: translateY(0);
+}
+
+.jin10-ai-button .ai-icon {
+    font-size: 14px;
+}
+
+.jin10-ai-button .ai-text {
+    font-size: 13px;
+}
+
+/* AI解读面板 */
+.jin10-ai-panel {
+    margin: 12px 0;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 面板头部 */
+.ai-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.ai-panel-title {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.ai-panel-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.ai-panel-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* 面板内容区 */
+.ai-panel-body {
+    padding: 16px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.ai-panel-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ai-panel-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.ai-panel-body::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.ai-panel-body::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+/* 加载状态 */
+.ai-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px;
+    color: #6b7280;
+}
+
+.ai-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.ai-loading p {
+    margin-top: 12px;
+    font-size: 13px;
+}
+
+/* 错误状态 */
+.ai-error {
+    padding: 16px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    color: #991b1b;
+}
+
+.ai-error p {
+    margin: 4px 0;
+}
+
+.ai-error-hint {
+    font-size: 12px;
+    color: #b91c1c;
+}
+
+/* AI分析内容 */
+.ai-content {
+    color: #1f2937;
+}
+
+.ai-analysis-text {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 0;
+    padding: 0;
+}
+
+.ai-analysis-text > * {
+    margin: 8px 0;
+}
+
+/* 表情符号优化 */
+.ai-analysis-text {
+    font-variant-emoji: text;
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+    .jin10-ai-button {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+
+    .ai-panel-body {
+        padding: 12px;
+        max-height: 400px;
+    }
+
+    .ai-analysis-text {
+        font-size: 12px;
+    }
+}

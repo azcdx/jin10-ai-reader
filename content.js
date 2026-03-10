@@ -39,10 +39,12 @@ class MarketDataScraper {
         }
 
         const data = { timestamp: Date.now(), crypto: {}, forex: {}, commodities: {}, stocks: {} };
-        try { data.crypto = await this.fetchCryptoData(); } catch (e) {}
-        try { data.forex = await this.fetchForexData(); } catch (e) {}
-        try { data.commodities = await this.fetchCommodityData(); } catch (e) {}
-        try { data.stocks = await this.fetchStockData(); } catch (e) {}
+        await Promise.all([
+            this.fetchCryptoData().then(r => data.crypto = r).catch(() => {}),
+            this.fetchForexData().then(r => data.forex = r).catch(() => {}),
+            this.fetchCommodityData().then(r => data.commodities = r).catch(() => {}),
+            this.fetchStockData().then(r => data.stocks = r).catch(() => {})
+        ]);
 
         this.cache.set(cacheKey, { timestamp: Date.now(), data });
         return data;
@@ -561,10 +563,13 @@ ${content}
 
 📚 历史参考
 类似事件：
-当时表现：`;
+当时表现：
+
+🔑 搜索关键词：请提取3-5个关键词（用逗号分隔），用于搜索相关新闻`;
     }
 
     async updatePanel(panel, analysis, marketData, relatedMarkets) {
+        
         const body = panel.querySelector('.ai-panel-body');
 
         if (analysis.error) {
@@ -586,10 +591,14 @@ ${content}
                 <button id="btn-favorite" class="ai-action-btn" style="flex: 1; padding: 8px 16px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
                     ⭐ 收藏
                 </button>
-                <button id="btn-view-favorites" class="ai-action-btn" style="flex: 1; padding: 8px 16px; background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                <button id="btn-view-favorites" class="ai-action-btn" style="flex: 1; padding: 8px 12px; background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
                     📋 查看收藏
                 </button>
+                <button id="btn-news-verify" class="ai-action-btn" style="flex: 1; padding: 8px 12px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                    🔍 相关新闻
+                </button>
             </div>
+            <div id="news-display-area" style="display: none;"></div>
             <div style="margin-top: 8px; font-size: 10px; color: #9ca3af; text-align: center;">
                 相关市场: ${relatedMarkets.join(', ') || '无'}
             </div>
@@ -616,10 +625,24 @@ ${content}
             });
         }
 
-        // 绑定查看收藏按钮
         const viewBtn = body.querySelector('#btn-view-favorites');
         if (viewBtn) {
             viewBtn.addEventListener('click', () => this.showFavoritesModal(panel));
+        }
+        // 绑定相关新闻按钮
+        const newsBtn = panel.querySelector('#btn-news-verify');
+        
+        if (newsBtn) {
+            
+            newsBtn.addEventListener('click', () => {
+                
+                this.fetchAndShowNews(panel);
+            });
+        } else {
+            
+            // 尝试从 body 查找
+            const newsBtn2 = body.querySelector('#btn-news-verify');
+            
         }
 
         // 按钮悬停效果
@@ -740,6 +763,66 @@ ${content}
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    extractKeywords() {
+        if (!this.currentAnalysis?.content) return [];
+        const aiContent = this.currentAnalysis.content;
+        const match = aiContent.match(/🔑 搜索关键词[:：](.+)/);
+        if (match) {
+            const keywordStr = match[1].trim();
+            const keywords = keywordStr.split(/[,，、]/).map(k => k.trim()).filter(k => k.length >= 2);
+            
+            return keywords.slice(0, 5);
+        }
+        
+        return [];
+    }
+
+    async fetchAndShowNews(panel) {
+        
+        const body = panel.querySelector('.ai-panel-body');
+        const newsArea = panel.querySelector('#news-display-area');
+        if (!newsArea) return;
+        newsArea.style.display = 'block';
+        newsArea.innerHTML = '<div style="padding: 12px; text-align: center;">正在搜索相关新闻...</div>';
+        try {
+            const keywords = this.extractKeywords();
+            
+            if (keywords.length === 0) {
+                this.updateNewsDisplay(newsArea, [], 'AI未提供搜索关键词');
+                return;
+            }
+            const news = await this.fetchRelatedNewsViaBackground(keywords);
+            this.updateNewsDisplay(newsArea, news);
+        } catch (e) {
+            console.error('[金十AI] 获取新闻失败:', e);
+            newsArea.innerHTML = '<div style="padding: 12px; background: #fef2f2; color: #991b1b;">获取失败</div>';
+        }
+    }
+
+    fetchRelatedNewsViaBackground(keywords) {
+        return new Promise((resolve, reject) => {
+            chrome.runtime.sendMessage({ action: 'fetchRelatedNews', keywords: keywords, limit: 5 }, (r) => {
+                r?.success ? resolve(r.news || []) : reject(new Error(r?.error || '失败'));
+            });
+        });
+    }
+
+    updateNewsDisplay(newsArea, news, errorMsg) {
+        if (errorMsg) { newsArea.innerHTML = '<div style="padding: 12px; background: #fef3c7; color: #92400e;">⚠️ ' + errorMsg + '</div>'; return; }
+        if (!news?.length) { newsArea.innerHTML = '<div style="padding: 12px; background: #f3f4f6; color: #6b7280;">暂无相关新闻</div>'; return; }
+        const html = news.map(item => '<div style="padding: 10px; background: #f9fafb; border-radius: 6px; margin-bottom: 8px; border-left: 3px solid #667eea;"><div><a href="' + item.url + '" target="_blank" style="font-size: 12px; color: #1f2937; text-decoration: none;">' + this.escapeHtml(item.title) + '</a></div><div style="font-size: 10px; color: #9ca3af; margin-top: 4px;"><span style="background: ' + (item.language === 'zh' ? '#dbeafe' : '#e0e7ff') + '; padding: 2px 6px; border-radius: 3px;">' + item.source + '</span><span>' + this.getTimeAgo(new Date(item.publishedAt)) + '</span></div></div>').join('');
+        newsArea.innerHTML = '<div style="padding: 12px 0;"><div style="display: flex; gap: 6px; margin-bottom: 10px; border-bottom: 1px solid #e5e7eb;"><span>📰</span><span style="font-weight: 600;">相关新闻 (' + news.length + ')</span></div>' + html + '</div>';
+    }
+
+    getTimeAgo(date) {
+        if (!(date instanceof Date) || isNaN(date)) return '未知时间';
+        const s = Math.floor((Date.now() - date.getTime()) / 1000);
+        if (s < 60) return '刚刚';
+        if (s < 3600) return Math.floor(s / 60) + '分钟前';
+        if (s < 86400) return Math.floor(s / 3600) + '小时前';
+        return Math.floor(s / 86400) + '天前';
     }
 
     async showFavoritesModal(parentPanel) {
